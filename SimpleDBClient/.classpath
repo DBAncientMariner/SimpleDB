@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 6 [1.6.0_65-b14-462]"/>
+	<classpathentry kind="lib" path="/Users/parth/Documents/Eclipse_Luna_JEE/eclipse/plugins/db-derby-10.11.1.1-bin/lib/derby.jar"/>
+	<classpathentry kind="lib" path="/Users/parth/Documents/Eclipse_Luna_JEE/eclipse/plugins/db-derby-10.11.1.1-bin/lib/derbyclient.jar"/>
+	<classpathentry kind="lib" path="/Users/parth/Downloads/javax.persistence-2.1.0-rc1.jar"/>
+	<classpathentry kind="lib" path="/Users/parth/Downloads/servlet-api.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/SimpleDBServer"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
