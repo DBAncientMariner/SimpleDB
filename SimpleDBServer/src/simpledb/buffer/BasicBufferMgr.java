@@ -1,5 +1,9 @@
 package simpledb.buffer;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import simpledb.file.Block;
 import simpledb.file.FileMgr;
 
@@ -10,6 +14,8 @@ import simpledb.file.FileMgr;
  */
 class BasicBufferMgr {
    private Buffer[] bufferpool;
+   //added rkyadav
+   private Map<Block,Buffer> bufferPoolMap;
    private int numAvailable;
    
    /**
@@ -27,6 +33,8 @@ class BasicBufferMgr {
     */
    BasicBufferMgr(int numbuffs) {
       bufferpool = new Buffer[numbuffs];
+      //added rkyadav
+      bufferPoolMap=new HashMap<Block,Buffer>();
       numAvailable = numbuffs;
       for (int i=0; i<numbuffs; i++)
          bufferpool[i] = new Buffer();
@@ -39,7 +47,9 @@ class BasicBufferMgr {
    synchronized void flushAll(int txnum) {
       for (Buffer buff : bufferpool)
          if (buff.isModifiedBy(txnum))
-         buff.flush();
+         {
+        	 buff.flush();
+         }
    }
    
    /**
@@ -103,18 +113,41 @@ class BasicBufferMgr {
    }
    
    private Buffer findExistingBuffer(Block blk) {
+	   //added rkyadav
+	   if(bufferPoolMap.containsKey(blk))
+	   {
+		   return bufferPoolMap.get(blk);
+	   }
+	   else return null;
+	   /*
       for (Buffer buff : bufferpool) {
          Block b = buff.block();
          if (b != null && b.equals(blk))
             return buff;
       }
       return null;
+      */
    }
    
    private Buffer chooseUnpinnedBuffer() {
-      for (Buffer buff : bufferpool)
+	   Iterator iterator=bufferPoolMap.entrySet().iterator();
+	   while(iterator.hasNext())
+	   {
+		   //iterate while it have next.
+		   Map.Entry<Block,Buffer> item=(Map.Entry<Block, Buffer>)iterator.next();
+		   if(!item.getValue().isPinned())
+		   {
+			   return item.getValue();
+		   }
+	   }
+      /*for (Buffer buff : bufferpool)
          if (!buff.isPinned())
-         return buff;
+         return buff;*/
       return null;
    }
+   //added rkyadav
+   boolean containsMapping(Block blk) {  
+	   return bufferPoolMap.containsKey(blk);  
+   } 
+
 }
