@@ -20,6 +20,7 @@ public class Buffer {
    private int pins = 0;
    private int modifiedBy = -1;  // negative means not modified
    private int logSequenceNumber = -1; // negative means no corresponding log record
+   private int ref_counter;
 
    /**
     * Creates a new buffer, wrapping a new 
@@ -188,4 +189,18 @@ public class Buffer {
       blk = contents.append(filename);
       pins = 0;
    }
+
+/**
+ * @return the ref_counter
+ */
+public int getRef_counter() {
+	return ref_counter;
+}
+
+/**
+ * @param ref_counter the ref_counter to set
+ */
+public void setRef_counter(int ref_counter) {
+	this.ref_counter = ref_counter;
+}
 }

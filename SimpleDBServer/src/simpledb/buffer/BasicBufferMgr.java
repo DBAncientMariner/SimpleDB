@@ -17,7 +17,7 @@ class BasicBufferMgr {
    //added rkyadav
    private Map<Block,Buffer> bufferPoolMap;
    private int numAvailable;
-   
+   private int iterator_main;
    /**
     * Creates a buffer manager having the specified number 
     * of buffer slots.
@@ -36,6 +36,7 @@ class BasicBufferMgr {
       //added rkyadav
 	  numAvailable = numbuffs;
       bufferPoolMap=new HashMap<Block,Buffer>();
+      iterator_main = 0;
       for (int i=0; i<numbuffs; i++)
     	  bufferPoolMap.put(new Buffer().block(),new Buffer());
       
@@ -110,6 +111,7 @@ class BasicBufferMgr {
       buff.unpin();
       if (!buff.isPinned())
          numAvailable++;
+      buff.setRef_counter(5);
    }
    
    /**
@@ -139,9 +141,33 @@ class BasicBufferMgr {
    
    private Buffer chooseUnpinnedBuffer() {
 	   //modified rkyadav
-	   for(Buffer buff: bufferPoolMap.values()){
-		   if (!buff.isPinned())
-		         return buff;
+	   int count = 0;
+	   int start = 0;
+	   int limit = 0;
+	   int iterator_gclock = iterator_main;
+	   while(limit<(numAvailable*5)){
+		   
+		   Iterator iterator = bufferPoolMap.entrySet().iterator();
+		   Buffer buff;
+		   iterator_gclock--;
+		   while(iterator.hasNext() && (iterator_gclock < 0) && limit<(numAvailable*5))
+		   {
+			   limit++;
+			  Map.Entry pairs = (Map.Entry)iterator.next();
+			  buff = (Buffer) pairs.getValue();
+			  
+			  if (!buff.isPinned() && buff.getRef_counter() == 0)
+			  {
+				  iterator_main = (iterator_main + limit) % numAvailable;
+				   return buff;
+			  }
+			  else if (!buff.isPinned() && buff.getRef_counter() != 0)
+			  {
+				  int curr = buff.getRef_counter();
+				  buff.setRef_counter(curr-1);
+			  }
+		   
+		  }
 	   }
       /*for (Buffer buff : bufferpool)
          if (!buff.isPinned())
