@@ -32,12 +32,12 @@ class BasicBufferMgr {
     * @param numbuffs the number of buffer slots to allocate
     */
    BasicBufferMgr(int numbuffs) {
-      bufferpool = new Buffer[numbuffs];
+     /* bufferpool = new Buffer[numbuffs];*/
       //added rkyadav
       bufferPoolMap=new HashMap<Block,Buffer>();
       numAvailable = numbuffs;
-      for (int i=0; i<numbuffs; i++)
-         bufferpool[i] = new Buffer();
+      /*for (int i=0; i<numbuffs; i++)
+         bufferpool[i] = new Buffer();*/
    }
    
    /**
@@ -45,11 +45,22 @@ class BasicBufferMgr {
     * @param txnum the transaction's id number
     */
    synchronized void flushAll(int txnum) {
-      for (Buffer buff : bufferpool)
+	   Iterator iterator=bufferPoolMap.entrySet().iterator();
+	   while(iterator.hasNext())
+	   {
+		   //iterate while it have next.
+		   Map.Entry<Block,Buffer> item=(Map.Entry<Block, Buffer>)iterator.next();
+		   if(item.getValue().isModifiedBy(txnum))
+		   {
+			   item.getValue().flush();
+		   }
+	   }
+	   
+      /*for (Buffer buff : bufferpool)
          if (buff.isModifiedBy(txnum))
          {
         	 buff.flush();
-         }
+         }*/
    }
    
    /**
