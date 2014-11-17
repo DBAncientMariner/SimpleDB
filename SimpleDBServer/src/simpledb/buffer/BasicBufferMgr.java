@@ -13,7 +13,7 @@ import simpledb.file.FileMgr;
  *
  */
 class BasicBufferMgr {
-   private Buffer[] bufferpool;
+   //private Buffer[] bufferpool;
    //added rkyadav
    private Map<Block,Buffer> bufferPoolMap;
    private int numAvailable;
@@ -34,8 +34,11 @@ class BasicBufferMgr {
    BasicBufferMgr(int numbuffs) {
      /* bufferpool = new Buffer[numbuffs];*/
       //added rkyadav
+	  numAvailable = numbuffs;
       bufferPoolMap=new HashMap<Block,Buffer>();
-      numAvailable = numbuffs;
+      for (int i=0; i<numbuffs; i++)
+    	  bufferPoolMap.put(new Buffer().block(),new Buffer());
+      
       /*for (int i=0; i<numbuffs; i++)
          bufferpool[i] = new Buffer();*/
    }
@@ -45,17 +48,11 @@ class BasicBufferMgr {
     * @param txnum the transaction's id number
     */
    synchronized void flushAll(int txnum) {
-	   Iterator iterator=bufferPoolMap.entrySet().iterator();
-	   while(iterator.hasNext())
-	   {
-		   //iterate while it have next.
-		   Map.Entry<Block,Buffer> item=(Map.Entry<Block, Buffer>)iterator.next();
-		   if(item.getValue().isModifiedBy(txnum))
-		   {
-			   item.getValue().flush();
-		   }
-	   }
-	   
+	   for (Buffer buff : bufferPoolMap.values())
+	         if (buff.isModifiedBy(txnum))
+	         {
+	        	 buff.flush();
+	         }
       /*for (Buffer buff : bufferpool)
          if (buff.isModifiedBy(txnum))
          {
@@ -142,15 +139,9 @@ class BasicBufferMgr {
    
    private Buffer chooseUnpinnedBuffer() {
 	   //modified rkyadav
-	   Iterator iterator=bufferPoolMap.entrySet().iterator();
-	   while(iterator.hasNext())
-	   {
-		   //iterate while it have next.
-		   Map.Entry<Block,Buffer> item=(Map.Entry<Block, Buffer>)iterator.next();
-		   if(!item.getValue().isPinned())
-		   {
-			   return item.getValue();
-		   }
+	   for(Buffer buff: bufferPoolMap.values()){
+		   if (!buff.isPinned())
+		         return buff;
 	   }
       /*for (Buffer buff : bufferpool)
          if (!buff.isPinned())
