@@ -18,6 +18,7 @@ class BasicBufferMgr {
    private Map<Block,Buffer> bufferPoolMap;
    private int numAvailable;
    private int iterator_main;
+   private int iterator_max = 5;
    /**
     * Creates a buffer manager having the specified number 
     * of buffer slots.
@@ -35,11 +36,16 @@ class BasicBufferMgr {
      /* bufferpool = new Buffer[numbuffs];*/
       //added rkyadav
 	  numAvailable = numbuffs;
-      bufferPoolMap=new HashMap<Block,Buffer>();
-      iterator_main = 0;
-      for (int i=0; i<numbuffs; i++)
-    	  bufferPoolMap.put(new Buffer().block(),new Buffer());
-      
+	  bufferPoolMap=new HashMap<Block,Buffer>();
+	  iterator_main = 0;
+	  int init = -1;
+	  for (int i=0; i<numbuffs; i++) {
+		  Block block = new Block("dummy", init);
+		  bufferPoolMap.put(block, new Buffer());
+		  init --;
+	  }
+//	  iterator_max = 5;
+//	  int y  = 0;
       /*for (int i=0; i<numbuffs; i++)
          bufferpool[i] = new Buffer();*/
    }
@@ -141,16 +147,14 @@ class BasicBufferMgr {
    
    private Buffer chooseUnpinnedBuffer() {
 	   //modified rkyadav
-	   int count = 0;
-	   int start = 0;
 	   int limit = 0;
 	   int iterator_gclock = iterator_main;
-	   while(limit<(numAvailable*5)){
+	   while(limit<(numAvailable*iterator_max)){
 		   
 		   Iterator iterator = bufferPoolMap.entrySet().iterator();
 		   Buffer buff;
 		   iterator_gclock--;
-		   while(iterator.hasNext() && (iterator_gclock < 0) && limit<(numAvailable*5))
+		   while(iterator.hasNext() && (iterator_gclock < 0) && limit<(numAvailable*iterator_max))
 		   {
 			   limit++;
 			  Map.Entry pairs = (Map.Entry)iterator.next();
