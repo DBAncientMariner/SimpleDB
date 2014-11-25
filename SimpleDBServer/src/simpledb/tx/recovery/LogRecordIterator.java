@@ -6,6 +6,7 @@ import static simpledb.tx.recovery.LogRecord.ROLLBACK;
 import static simpledb.tx.recovery.LogRecord.SETINT;
 import static simpledb.tx.recovery.LogRecord.SETSTRING;
 import static simpledb.tx.recovery.LogRecord.START;
+import static simpledb.tx.recovery.LogRecord.UPDATE;
 
 import java.util.Iterator;
 
@@ -52,6 +53,8 @@ class LogRecordIterator implements Iterator<LogRecord> {
             return new SetIntRecord(rec);
          case SETSTRING:
             return new SetStringRecord(rec);
+         case UPDATE:
+        	return new UpdateRecord(rec);
          default:
             return null;
       }

@@ -9,11 +9,11 @@ import simpledb.server.SimpleDB;
  */
 public interface LogRecord {
    /**
-    * The six different types of log record
+    * The seven different types of log record
     */
    static final int CHECKPOINT = 0, START = 1,
       COMMIT = 2, ROLLBACK  = 3,
-      SETINT = 4, SETSTRING = 5;
+      SETINT = 4, SETSTRING = 5, UPDATE = 6;
    
    static final LogMgr logMgr = SimpleDB.logMgr();
    
