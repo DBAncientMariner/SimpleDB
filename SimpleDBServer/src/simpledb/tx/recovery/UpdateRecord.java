@@ -4,27 +4,34 @@ import simpledb.file.Block;
 import simpledb.log.BasicLogRecord;
 
 public class UpdateRecord implements LogRecord {
-	
+
 	private int txnum;
 	private String FileName;
 	private int block_updated, block_saved;
 
 	public UpdateRecord(BasicLogRecord rec) {
 		// TODO Auto-generated constructor stub
-		 txnum = rec.nextInt();
-	     FileName = rec.nextString();
-	     block_updated = rec.nextInt();
-	   // blk = new Block(filename, blknum);
-	   //  offset = rec.nextInt();
-	    // val = rec.nextString();
+		txnum = rec.nextInt();
+		FileName = rec.nextString();
+		block_updated = rec.nextInt();
+		// blk = new Block(filename, blknum);
+		// offset = rec.nextInt();
+		// val = rec.nextString();
 	}
 
 	@Override
 	public int writeToLog() {
-		// TODO Auto-generated method stub
-		return 0;
+		Object[] rec = new Object[] { UPDATE, txnum, FileName,
+				block_updated, block_saved};
+		return logMgr.append(rec);
 	}
 
+	 public UpdateRecord(int txnum, String FileName, int block_updated , int  block_saved) {
+	      this.txnum = txnum;
+	      this.FileName = FileName;
+	      this.block_updated = block_updated;
+	      this.block_saved = block_saved;
+	   }
 	@Override
 	public int op() {
 		// TODO Auto-generated method stub
@@ -55,7 +62,8 @@ public class UpdateRecord implements LogRecord {
 	}
 
 	/**
-	 * @param fileName the fileName to set
+	 * @param fileName
+	 *            the fileName to set
 	 */
 	public void setFileName(String fileName) {
 		FileName = fileName;
@@ -69,7 +77,8 @@ public class UpdateRecord implements LogRecord {
 	}
 
 	/**
-	 * @param block_saved the block_saved to set
+	 * @param block_saved
+	 *            the block_saved to set
 	 */
 	public void setBlock_saved(int block_saved) {
 		this.block_saved = block_saved;
@@ -83,7 +92,8 @@ public class UpdateRecord implements LogRecord {
 	}
 
 	/**
-	 * @param block_updated the block_updated to set
+	 * @param block_updated
+	 *            the block_updated to set
 	 */
 	public void setBlock_updated(int block_updated) {
 		this.block_updated = block_updated;
