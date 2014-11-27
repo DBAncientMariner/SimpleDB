@@ -59,7 +59,7 @@ public class FileMgr {
     * @param blk a reference to a disk block
     * @param bb  the bytebuffer
     */
-   synchronized void read(Block blk, ByteBuffer bb) {
+   public synchronized void read(Block blk, ByteBuffer bb) {
       try {
          bb.clear();
          FileChannel fc = getFile(blk.fileName());
@@ -93,7 +93,7 @@ public class FileMgr {
     * @param bb  the bytebuffer
     * @return a reference to the newly-created block.
     */
-   synchronized Block append(String filename, ByteBuffer bb) {
+   public synchronized Block append(String filename, ByteBuffer bb) {
       int newblknum = size(filename);
       Block blk = new Block(filename, newblknum);
       write(blk, bb);

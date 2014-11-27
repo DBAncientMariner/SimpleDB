@@ -27,6 +27,7 @@ import simpledb.tx.Transaction;
 public class SimpleDB {
    public static int BUFFER_SIZE = 8;
    public static String LOG_FILE = "simpledb.log";
+   public static String BACKUP_FILE = "simpledb.backup";
    
    private static FileMgr     fm;
    private static BufferMgr   bm;
