@@ -160,11 +160,13 @@ public class Page {
    
    public synchronized byte[] getAllContent() {
 	   byte[] dst = new byte[BLOCK_SIZE];
+	   contents.rewind();
 	   contents.get(dst);
 	   return dst;
    }
    
    public synchronized void setAllContent(ByteBuffer bb) {
 	   contents = bb;
+	   contents.rewind();
    }
 }
