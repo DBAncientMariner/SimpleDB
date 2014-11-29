@@ -14,6 +14,7 @@ public class UpdateRecord implements LogRecord {
 		txnum = rec.nextInt();
 		FileName = rec.nextString();
 		block_updated = rec.nextInt();
+		block_saved = rec.nextInt();
 		// blk = new Block(filename, blknum);
 		// offset = rec.nextInt();
 		// val = rec.nextString();
@@ -32,6 +33,14 @@ public class UpdateRecord implements LogRecord {
 	      this.block_updated = block_updated;
 	      this.block_saved = block_saved;
 	   }
+	public UpdateRecord(int txnum2, Block blk, int blk_no) {
+		// TODO Auto-generated constructor stub
+		this.txnum = txnum2;
+		this.FileName = blk.fileName();
+		this.block_updated = blk.number();
+		this.block_saved = blk_no;
+	}
+
 	@Override
 	public int op() {
 		// TODO Auto-generated method stub
@@ -47,6 +56,9 @@ public class UpdateRecord implements LogRecord {
 	@Override
 	public void undo(int txnum) {
 		// TODO Auto-generated method stub
+		Block blk = new Block(FileName,block_updated);
+		simpledb.buffer.Buffer bfr = new simpledb.buffer.Buffer();
+		bfr.restoreBlock(blk,block_saved);
 
 	}
 

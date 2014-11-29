@@ -71,10 +71,14 @@ public class RecoveryMgr {
    public int setInt(Buffer buff, int offset, int newval) {
       int oldval = buff.getInt(offset);
       Block blk = buff.block();
+      int blk_no = buff.saveBlock();
       if (isTempBlock(blk))
          return -1;
       else
-         return new SetIntRecord(txnum, blk, offset, oldval).writeToLog();
+      {
+       //  return new SetIntRecord(txnum, blk, offset, oldval).writeToLog();
+    	  return new UpdateRecord(txnum,blk,blk_no).writeToLog();
+      }
    }
 
    /**
@@ -88,10 +92,14 @@ public class RecoveryMgr {
    public int setString(Buffer buff, int offset, String newval) {
       String oldval = buff.getString(offset);
       Block blk = buff.block();
+      int blk_no = buff.saveBlock();
       if (isTempBlock(blk))
          return -1;
       else
-         return new SetStringRecord(txnum, blk, offset, oldval).writeToLog();
+      {
+       //  return new SetStringRecord(txnum, blk, offset, oldval).writeToLog();
+    	  return new UpdateRecord(txnum,blk,blk_no).writeToLog();
+      }
    }
 
    /**
