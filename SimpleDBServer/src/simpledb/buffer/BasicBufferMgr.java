@@ -6,6 +6,7 @@ import java.util.Map;
 
 import simpledb.file.Block;
 import simpledb.file.FileMgr;
+import simpledb.server.Startup;
 
 /**
  * Manages the pinning and unpinning of buffers to blocks.
@@ -18,7 +19,7 @@ class BasicBufferMgr {
    private Map<Block,Buffer> bufferPoolMap;
    private int numAvailable;
    private int iterator_main;
-   private int iterator_max = 5;
+   private int iterator_max;
    /**
     * Creates a buffer manager having the specified number 
     * of buffer slots.
@@ -39,6 +40,7 @@ class BasicBufferMgr {
 	  bufferPoolMap=new HashMap<Block,Buffer>();
 	  iterator_main = 0;
 	  int init = -1;
+	  iterator_max = Startup.Get_clock_value();
 	  for (int i=0; i<numbuffs; i++) {
 		  Block block = new Block("dummy", init);
 		  bufferPoolMap.put(block, new Buffer());
