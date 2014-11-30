@@ -1,7 +1,5 @@
 package simpledb.buffer;
 
-import java.nio.ByteBuffer;
-
 import simpledb.file.Block;
 import simpledb.file.Page;
 import simpledb.server.SimpleDB;
@@ -22,7 +20,7 @@ public class Buffer {
 	private int modifiedBy = -1; // negative means not modified
 	private int logSequenceNumber = -1; // negative means no corresponding log
 										// record
-	private int ref_counter;
+	private int refCounter;	// Maintains the gclock counter for the buffer
 
 	/**
 	 * Creates a new buffer, wrapping a new {@link simpledb.file.Page page}.
@@ -203,7 +201,7 @@ public class Buffer {
 	 * @return the ref_counter
 	 */
 	public int getRef_counter() {
-		return ref_counter;
+		return refCounter;
 	}
 
 	/**
@@ -211,7 +209,7 @@ public class Buffer {
 	 *            the ref_counter to set
 	 */
 	public void setRef_counter(int ref_counter) {
-		this.ref_counter = ref_counter;
+		this.refCounter = ref_counter;
 	}
 
 	/**
@@ -221,9 +219,7 @@ public class Buffer {
 	 *         This is to be logged in block_saved in the log file.
 	 */
 	public int saveBlock() {
-		ByteBuffer bb = ByteBuffer.allocateDirect(Page.BLOCK_SIZE);
-		bb.put(contents.getAllContent());
-		Block blk = SimpleDB.fileMgr().append(SimpleDB.BACKUP_FILE, bb);
+		Block blk = contents.append(SimpleDB.BACKUP_FILE);
 		return blk.number();
 	}
 
@@ -236,12 +232,9 @@ public class Buffer {
 	 * @param blocknum
 	 *            Block number from the backup file to fetch the block.
 	 */
-	public void restoreBlock(Block tobeRestored, int blocknum) {
-		ByteBuffer bb = ByteBuffer.allocateDirect(Page.BLOCK_SIZE);
-		Block bBlk = new Block(SimpleDB.BACKUP_FILE, blocknum);
-		SimpleDB.fileMgr().read(bBlk, bb);
-		this.blk = new Block(tobeRestored.fileName(), tobeRestored.number());
-		this.contents = new Page();
-		contents.setAllContent(bb);
+	public void restoreBlock(int blocknum) {
+		Block backupBlock = new Block(SimpleDB.BACKUP_FILE, blocknum);
+		contents.read(backupBlock);
+		contents.write(blk);
 	}
 }

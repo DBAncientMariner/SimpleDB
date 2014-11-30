@@ -157,16 +157,4 @@ public class Page {
       contents.putInt(byteval.length);
       contents.put(byteval);
    }
-   
-   public synchronized byte[] getAllContent() {
-	   byte[] dst = new byte[BLOCK_SIZE];
-	   contents.rewind();
-	   contents.get(dst);
-	   return dst;
-   }
-   
-   public synchronized void setAllContent(ByteBuffer bb) {
-	   contents = bb;
-	   contents.rewind();
-   }
 }

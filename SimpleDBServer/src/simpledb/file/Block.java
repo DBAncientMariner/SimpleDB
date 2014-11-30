@@ -50,4 +50,12 @@ public class Block {
    public int hashCode() {
       return toString().hashCode();
    }
+   
+   public void setFileName(String fileName) {
+	   this.filename = fileName;
+   }
+   
+   public void setNumber(int blknum) {
+	   this.blknum = blknum;
+   }
 }
