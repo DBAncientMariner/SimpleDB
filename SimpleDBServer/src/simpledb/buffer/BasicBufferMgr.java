@@ -180,7 +180,6 @@ class BasicBufferMgr {
 	}
 
 	private Buffer findExistingBuffer(Block blk) {
-		// added rkyadav
 		Set<Entry<Block, Buffer>> entrySet = bufferPoolMap.entrySet();
 		for (Entry<Block, Buffer> entry : entrySet) {
 			Block block = entry.getKey();
@@ -266,8 +265,11 @@ class BasicBufferMgr {
 		return newBuffer;
 	}
 
-	// added rkyadav
 	boolean containsMapping(Block blk) {
-		return bufferPoolMap.containsKey(blk);
+		Buffer buffer = findExistingBuffer(blk);
+		if(buffer != null) {
+			return true;
+		}
+		return false;
 	}
 }
