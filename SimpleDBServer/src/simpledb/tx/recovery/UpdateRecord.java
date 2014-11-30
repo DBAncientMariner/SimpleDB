@@ -55,6 +55,7 @@ public class UpdateRecord implements LogRecord {
 		BufferMgr bufferMgr = SimpleDB.bufferMgr();
 		Buffer bfr = bufferMgr.pin(blk);
 		bfr.restoreBlock(backupBlockNum);
+		bufferMgr.unpin(bfr);
 	}
 	
 	@Override

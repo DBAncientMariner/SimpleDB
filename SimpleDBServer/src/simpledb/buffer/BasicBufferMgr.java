@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import simpledb.file.Block;
 import simpledb.file.FileMgr;
@@ -19,6 +20,7 @@ class BasicBufferMgr {
 	// added rkyadav
 	private Map<Block, Buffer> bufferPoolMap;
 	private int numAvailable;
+	private int bufferSize;
 	private int clockPointer;
 	private int gClockMax;
 
@@ -38,6 +40,7 @@ class BasicBufferMgr {
 		// bufferpool = new Buffer[numbuffs]; */
 		// added rkyadav
 		numAvailable = numbuffs;
+		bufferSize = numbuffs;
 		bufferPoolMap = new LinkedHashMap<Block, Buffer>();
 		clockPointer = 0;
 		int init = -1;
@@ -82,6 +85,7 @@ class BasicBufferMgr {
 	 * @return the pinned buffer
 	 */
 	synchronized Buffer pin(Block blk) {
+		System.out.println("clock Pointer : " + clockPointer);
 		Buffer buff = findExistingBuffer(blk);
 		if (buff == null) {
 			buff = chooseUnpinnedBuffer(blk.fileName(), blk.number(), null);
@@ -91,6 +95,24 @@ class BasicBufferMgr {
 		if (!buff.isPinned())
 			numAvailable--;
 		buff.pin();
+		System.out.println("----------Pin----------");
+		System.out.println("clock Pointer : " + clockPointer);
+		Set<Entry<Block, Buffer>> entrySet = bufferPoolMap.entrySet();
+		for (Entry<Block, Buffer> entry : entrySet) {
+			Block block = entry.getKey();
+			Buffer buffer = entry.getValue();
+			String output = "Filename : ";
+			if(block != null) {
+				output = output + block.fileName() + " | ";
+				output = output + "Number : " + block.number();
+			}
+			if(buffer != null) {
+				output = output + " | RefCount : " + buffer.getRef_counter();
+				output = output + " | Pin : " + buffer.isPinned();
+			}
+			System.out.println(output);
+		}
+		System.out.println("Available : " + numAvailable);
 		return buff;
 	}
 
@@ -106,11 +128,29 @@ class BasicBufferMgr {
 	 * @return the pinned buffer
 	 */
 	synchronized Buffer pinNew(String filename, PageFormatter fmtr) {
+		System.out.println("clock Pointer : " + clockPointer);
 		Buffer buff = chooseUnpinnedBuffer(filename, -1, fmtr);
 		if (buff == null)
 			return null;
 		numAvailable--;
 		buff.pin();
+		System.out.println("----------New Pin----------");
+		System.out.println("clock Pointer : " + clockPointer);
+		Set<Entry<Block, Buffer>> entrySet = bufferPoolMap.entrySet();
+		for (Entry<Block, Buffer> entry : entrySet) {
+			Block block = entry.getKey();
+			Buffer buffer = entry.getValue();
+			String output = "Filename : ";
+			if(block != null) {
+				output = output + block.fileName() + " | ";
+				output = output + "Number : " + block.number();
+			}
+			if(buffer != null) {
+				output = output + " | RefCount : " + buffer.getRef_counter();
+			}
+			System.out.println(output);
+		}
+		System.out.println("Available : " + numAvailable);
 		return buff;
 	}
 
@@ -126,6 +166,8 @@ class BasicBufferMgr {
 			numAvailable++;
 			buff.setRef_counter(5);
 		}
+		System.out.println("-----------UnPin----------");
+		System.out.println("Available : " + numAvailable);
 	}
 
 	/**
@@ -139,46 +181,20 @@ class BasicBufferMgr {
 
 	private Buffer findExistingBuffer(Block blk) {
 		// added rkyadav
-		if (bufferPoolMap.containsKey(blk)) {
-			return bufferPoolMap.get(blk);
-		} else
-			return null;
+		Set<Entry<Block, Buffer>> entrySet = bufferPoolMap.entrySet();
+		for (Entry<Block, Buffer> entry : entrySet) {
+			Block block = entry.getKey();
+			if(block.equals(blk)){
+				return entry.getValue();
+			}
+		}
+		return null;
+
 		/*
 		 * for (Buffer buff : bufferpool) { Block b = buff.block(); if (b !=
 		 * null && b.equals(blk)) return buff; } return null;
 		 */
 	}
-
-	// private Buffer chooseUnpinnedBuffer() {
-	// // modified rkyadav
-	// int limit = 0;
-	// int iterator_gclock = clockPointer;
-	// while (limit <= (numAvailable * (gClockMax + 1))) {
-	//
-	// Iterator iterator = bufferPoolMap.entrySet().iterator();
-	// Buffer buff;
-	// iterator_gclock--;
-	// while (iterator.hasNext() && (iterator_gclock < 0)
-	// && limit < (numAvailable * gClockMax)) {
-	// limit++;
-	// Map.Entry pairs = (Map.Entry) iterator.next();
-	// buff = (Buffer) pairs.getValue();
-	//
-	// if (!buff.isPinned() && buff.getRef_counter() == 0) {
-	// clockPointer = (clockPointer + limit) % numAvailable;
-	// return buff;
-	// } else if (!buff.isPinned() && buff.getRef_counter() != 0) {
-	// int curr = buff.getRef_counter();
-	// buff.setRef_counter(curr - 1);
-	// }
-	//
-	// }
-	// }
-	// /*
-	// * for (Buffer buff : bufferpool) if (!buff.isPinned()) return buff;
-	// */
-	// return null;
-	// }
 
 	private Buffer chooseUnpinnedBuffer(String fileName, int number,
 			PageFormatter fmtr) {
@@ -193,11 +209,11 @@ class BasicBufferMgr {
 				currentPointer++;
 			}
 
-			while (currentPointer != numAvailable && iterator.hasNext()) {
+			while (currentPointer != bufferSize && iterator.hasNext()) {
 				Entry<Block, Buffer> entry = iterator.next();
 				if (!entry.getValue().isPinned()) {
 					if (entry.getValue().getRef_counter() == 0) {
-						clockPointer = currentPointer + 1;
+						clockPointer = (currentPointer + 1) % bufferSize;
 						Buffer newBuffer = entry.getValue();
 						Block key = entry.getKey();
 						return getUpdatedBuffer(fileName, number, fmtr,
@@ -205,7 +221,7 @@ class BasicBufferMgr {
 					} else {
 						Buffer buffer = entry.getValue();
 						int ref_counter = buffer.getRef_counter();
-						buffer.setRef_counter(ref_counter + 1);
+						buffer.setRef_counter(ref_counter - 1);
 					}
 				}
 				currentPointer++;
@@ -218,7 +234,7 @@ class BasicBufferMgr {
 				Entry<Block, Buffer> entry = iterator.next();
 				if (!entry.getValue().isPinned()) {
 					if (entry.getValue().getRef_counter() == 0) {
-						clockPointer = currentPointer + 1;
+						clockPointer = (currentPointer + 1) % bufferSize;
 						Buffer newBuffer = entry.getValue();
 						Block key = entry.getKey();
 						return getUpdatedBuffer(fileName, number, fmtr,
@@ -226,7 +242,7 @@ class BasicBufferMgr {
 					} else {
 						Buffer buffer = entry.getValue();
 						int ref_counter = buffer.getRef_counter();
-						buffer.setRef_counter(ref_counter + 1);
+						buffer.setRef_counter(ref_counter - 1);
 					}
 				}
 				currentPointer++;
