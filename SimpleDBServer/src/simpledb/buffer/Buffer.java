@@ -232,9 +232,9 @@ public class Buffer {
 	 * @param blocknum
 	 *            Block number from the backup file to fetch the block.
 	 */
-	public void restoreBlock(int blocknum) {
+	public void restoreBlock(int txnum, int blocknum) {
 		Block backupBlock = new Block(SimpleDB.BACKUP_FILE, blocknum);
 		contents.read(backupBlock);
-		contents.write(blk);
+		modifiedBy = txnum;
 	}
 }

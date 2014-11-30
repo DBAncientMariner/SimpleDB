@@ -1,5 +1,10 @@
 package simpledb.tx;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import simpledb.buffer.Buffer;
 import simpledb.buffer.PageFormatter;
 import simpledb.file.Block;
@@ -20,6 +25,7 @@ public class Transaction {
    private ConcurrencyMgr concurMgr;
    private int txnum;
    private BufferList myBuffers = new BufferList();
+   private Map<Block, Integer> loggedBlocks = new HashMap<Block, Integer>();
    
    /**
     * Creates a new transaction and its associated 
@@ -144,8 +150,12 @@ public class Transaction {
    public void setInt(Block blk, int offset, int val) {
       concurMgr.xLock(blk);
       Buffer buff = myBuffers.getBuffer(blk);
-      int lsn = recoveryMgr.setInt(buff, offset, val);
-      buff.setInt(offset, val, txnum, lsn);
+      int loggedLSN = isLogged(blk);
+      if(loggedLSN == -1) {
+    	  loggedLSN = recoveryMgr.setInt(buff, offset, val);
+    	  loggedBlocks.put(blk, loggedLSN);
+      }
+      buff.setInt(offset, val, txnum, loggedLSN);
    }
    
    /**
@@ -164,8 +174,12 @@ public class Transaction {
    public void setString(Block blk, int offset, String val) {
       concurMgr.xLock(blk);
       Buffer buff = myBuffers.getBuffer(blk);
-      int lsn = recoveryMgr.setString(buff, offset, val);
-      buff.setString(offset, val, txnum, lsn);
+      int loggedLSN = isLogged(blk);
+      if(loggedLSN == -1) {
+    	  loggedLSN = recoveryMgr.setString(buff, offset, val);
+    	  loggedBlocks.put(blk, loggedLSN);
+      }
+      buff.setString(offset, val, txnum, loggedLSN);
    }
    
    /**
@@ -203,5 +217,16 @@ public class Transaction {
       nextTxNum++;
       System.out.println("new transaction: " + nextTxNum);
       return nextTxNum;
+   }
+   
+   private synchronized int isLogged(Block blk) {
+	   Set<Entry<Block, Integer>> entrySet = loggedBlocks.entrySet();
+	   for (Entry<Block, Integer> entry : entrySet) {
+		   Block loggedBlocked = entry.getKey();
+		   if(loggedBlocked.equals(blk)) {
+			   return entry.getValue();
+		   }
+	   }
+	   return -1;
    }
 }
