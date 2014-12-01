@@ -85,7 +85,6 @@ class BasicBufferMgr {
 	 * @return the pinned buffer
 	 */
 	synchronized Buffer pin(Block blk) {
-		System.out.println("clock Pointer : " + clockPointer);
 		Buffer buff = findExistingBuffer(blk);
 		if (buff == null) {
 			buff = chooseUnpinnedBuffer(blk.fileName(), blk.number(), null);
@@ -107,12 +106,12 @@ class BasicBufferMgr {
 				output = output + "Number : " + block.number();
 			}
 			if(buffer != null) {
-				output = output + " | RefCount : " + buffer.getRef_counter();
-				output = output + " | Pin : " + buffer.isPinned();
+				output = output + " | RefCount : " + (buffer.getPinCount() > 0 ? "-" : buffer.getRef_counter());
+				output = output + " | PinCount : " + buffer.getPinCount();
 			}
 			System.out.println(output);
 		}
-		System.out.println("Available : " + numAvailable);
+		System.out.println("Available Buffers : " + numAvailable);
 		return buff;
 	}
 
@@ -146,11 +145,12 @@ class BasicBufferMgr {
 				output = output + "Number : " + block.number();
 			}
 			if(buffer != null) {
-				output = output + " | RefCount : " + buffer.getRef_counter();
+				output = output + " | RefCount : " + (buffer.getPinCount() > 0 ? "-" : buffer.getRef_counter());
+				output = output + " | PinCount : " + buffer.getPinCount();
 			}
 			System.out.println(output);
 		}
-		System.out.println("Available : " + numAvailable);
+		System.out.println("Available Buffers : " + numAvailable);
 		return buff;
 	}
 
@@ -167,7 +167,23 @@ class BasicBufferMgr {
 			buff.setRef_counter(5);
 		}
 		System.out.println("-----------UnPin----------");
-		System.out.println("Available : " + numAvailable);
+		System.out.println("clock Pointer : " + clockPointer);
+		Set<Entry<Block, Buffer>> entrySet = bufferPoolMap.entrySet();
+		for (Entry<Block, Buffer> entry : entrySet) {
+			Block block = entry.getKey();
+			Buffer buffer = entry.getValue();
+			String output = "Filename : ";
+			if(block != null) {
+				output = output + block.fileName() + " | ";
+				output = output + "Number : " + block.number();
+			}
+			if(buffer != null) {
+				output = output + " | RefCount : " + (buffer.getPinCount() > 0 ? "-" : buffer.getRef_counter());
+				output = output + " | PinCount : " + buffer.getPinCount();
+			}
+			System.out.println(output);
+		}
+		System.out.println("Available Buffers : " + numAvailable);
 	}
 
 	/**
@@ -252,6 +268,8 @@ class BasicBufferMgr {
 
 	private Buffer getUpdatedBuffer(String fileName, int number,
 			PageFormatter fmtr, Buffer newBuffer, Block key) {
+		System.out.println("GClock Policy Applied");
+		System.out.println("Block Replaced, Filename : " + key.fileName() + " | Block Number : " + key.number());
 		if (number == -1) {
 			newBuffer.assignToNew(fileName, fmtr);
 			Block newBlock = newBuffer.block();
@@ -262,6 +280,7 @@ class BasicBufferMgr {
 			key.setNumber(number);
 			newBuffer.assignToBlock(key);
 		}
+		
 		return newBuffer;
 	}
 

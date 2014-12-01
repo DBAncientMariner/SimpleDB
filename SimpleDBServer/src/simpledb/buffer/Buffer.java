@@ -152,6 +152,14 @@ public class Buffer {
 	boolean isPinned() {
 		return pins > 0;
 	}
+	
+	/**
+	 * Returns the Pin count on the buffer.
+	 * @return	int specifying the pin count.
+	 */
+	int getPinCount() {
+		return pins;
+	}
 
 	/**
 	 * Returns true if the buffer is dirty due to a modification by the

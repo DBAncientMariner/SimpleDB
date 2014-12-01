@@ -56,7 +56,7 @@ class StatMgr {
       TableInfo tcatmd = tblMgr.getTableInfo("tblcat", tx);
       RecordFile tcatfile = new RecordFile(tcatmd, tx);
       while(tcatfile.next()) {
-         String tblname = tcatfile.getString("tblname");
+         String tblname = tcatfile.getString("tblname").trim();
          TableInfo md = tblMgr.getTableInfo(tblname, tx);
          StatInfo si = calcTableStats(md, tx);
          tablestats.put(tblname, si);

@@ -17,12 +17,18 @@ public class StudentMajorNoServer {
 	public static void main(String[] args) {
 		try {
 			// analogous to the driver
-			SimpleDB.init("studentdb");
+			SimpleDB.init("simpleDb");
 			
 			// analogous to the connection
 			Transaction tx = new Transaction();
 			
 			// analogous to the statement
+			String cmd = "update STUDENT set MajorId=10 "
+			           + "where SName = 'amy'";
+			
+			int out = SimpleDB.planner().executeUpdate(cmd,tx);
+			System.out.println("Output : " + out);
+			
 			String qry = "select SName, DName "
 		        + "from DEPT, STUDENT "
 		        + "where MajorId = DId";	

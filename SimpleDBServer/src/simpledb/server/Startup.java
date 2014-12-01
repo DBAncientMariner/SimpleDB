@@ -15,9 +15,28 @@ public class Startup {
 	}
 
 	public static void main(String args[]) throws Exception {
-		g_clock_value = Integer.parseInt(args[1]);
+		try {
+			if(args != null && args.length == 2) {
+				g_clock_value = Integer.parseInt(args[1]);
+				if(g_clock_value <= 0) {
+					System.out.println("Setting default gclock value to 5 since specified value is negative");
+					g_clock_value = 5; 
+				}
+			} else {
+				System.out.println("Setting default gclock value to 5");
+				g_clock_value = 5; 
+			}
+		} catch(Exception e) {
+			System.out.println("Setting default gclock value to 5");
+			g_clock_value = 5;
+		}
 		// configure and initialize the database
-		SimpleDB.init(args[0]);
+		if(args != null && args.length > 0) {
+			SimpleDB.init(args[0]);
+		} else {
+			System.out.println("Default database name is set to SimpleDB");
+			SimpleDB.init("SimpleDB");
+		}
 		// create a registry specific for the server on the default port
 		Registry reg = LocateRegistry.createRegistry(1099);
 
